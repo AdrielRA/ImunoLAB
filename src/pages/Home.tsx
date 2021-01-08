@@ -1,7 +1,3 @@
-/**
- * @format
- */
-
 import React, {useState, useEffect, useRef} from 'react';
 import {StyleSheet, Text, TouchableOpacity, Alert, View} from 'react-native';
 import UnityView, {UnityModule, MessageHandler} from 'react-native-unity-view';
