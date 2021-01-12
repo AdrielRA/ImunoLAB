@@ -24,7 +24,7 @@ const Button: React.FC<Props> = (props) => {
         type === 'outline' ? styles.outline : styles.container,
       ]}>
       <Text
-        weight="bold"
+        weight="black"
         color={type === 'outline' ? 'primary' : 'light'}
         style={styles.txt}>
         {text.toUpperCase()}

@@ -2,6 +2,10 @@
   "colors": {
     "primary": "#239D60",
     "dark": "#212125",
-    "light": "#fff"
+    "light": "#fff",
+    "easy": "#A3DE83",
+    "normal": "#239D60",
+    "middle": "#F7F39A",
+    "hard": "#DE3135"
   }
 }

@@ -1,55 +1,47 @@
 import React from 'react';
-import {StyleSheet, View, Image} from 'react-native';
-import {Text, Input, Button} from '../components';
+import {StyleSheet, View, Image, TouchableOpacity} from 'react-native';
+import {Input, Button, Logo} from '../components';
+import {useNavigation} from '@react-navigation/native';
 
 const Login: React.FC = () => {
-  const handleText = (text: string) => {
-    console.log(text);
+  const navigation = useNavigation();
+
+  const handleLogin = () => {
+    navigation.reset({index: 0, routes: [{name: 'Home'}]});
   };
 
   return (
     <View style={styles.page}>
-      <View style={styles.inlineTxt}>
-        <Text weight="black" style={styles.title}>
-          IMUNO
-        </Text>
-        <Text weight="black" color="primary" style={styles.title}>
-          LAB
-        </Text>
-      </View>
-
+      <Logo style={styles.logo} />
       <View>
         <Input
           icon="user-circle"
           placeholder="seu.email@aqui.com"
           style={styles.input}
-          onChangeText={handleText}
         />
-        <Input
-          icon="lock"
-          placeholder="Senha"
-          secureTextEntry={true}
-          onChangeText={handleText}
+        <Input icon="lock" placeholder="Senha" secureTextEntry={true} />
+        <Button
+          style={[styles.button, styles.formPad]}
+          text="Entrar"
+          onPress={handleLogin}
         />
-        <Button style={[styles.button, styles.formPad]} text="Entrar" />
         <Button style={styles.button} text="Cadastrar" type="outline" />
-        <View style={styles.inlineTxt}>
-          <Image
-            source={require('../assets/images/UNIFENAS.png')}
-            style={styles.unifenas}
-          />
-        </View>
       </View>
+
+      <TouchableOpacity style={styles.btnUnifenas}>
+        <Image
+          source={require('../assets/images/UNIFENAS.png')}
+          style={styles.unifenas}
+        />
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   page: {padding: 15},
-  inlineTxt: {
+  logo: {
     marginVertical: '22%',
-    flexDirection: 'row',
-    justifyContent: 'center',
   },
   input: {
     marginVertical: 10,
@@ -60,12 +52,15 @@ const styles = StyleSheet.create({
   button: {
     marginVertical: 5,
   },
-  title: {
-    fontSize: 50,
+  btnUnifenas: {
+    marginVertical: '22%',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   unifenas: {
-    width: 200,
-    aspectRatio: 4,
+    height: 50,
+    resizeMode: 'contain',
   },
 });
 

@@ -1,119 +1,164 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {StyleSheet, Text, TouchableOpacity, Alert, View} from 'react-native';
-import UnityView, {UnityModule, MessageHandler} from 'react-native-unity-view';
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  Modal,
+  useColorScheme,
+  TouchableOpacity,
+} from 'react-native';
+import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import theme from '../assets/theme.json';
+import {useNavigation} from '@react-navigation/native';
+
+type Experiment = {
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'normal' | 'middle' | 'hard';
+};
 
 const Home: React.FC = () => {
-  const [active, setActive] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [paused, setPaused] = useState(false);
-  const [rotate, setRotate] = useState(true);
-  const [counter, setCounter] = useState(0);
+  const navigation = useNavigation();
+  const colorScheme = useColorScheme();
 
-  const unity = useRef(null);
+  const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 5000);
-  }, []);
+  const handleModal = () => setShowModal(!showModal);
 
-  useEffect(() => {
-    if (paused) {
-      UnityModule.pause();
-    } else {
-      UnityModule.resume();
-    }
-  }, [paused]);
-
-  const handleActive = () => {
-    setActive(!active);
+  const handleProfile = () => {
+    navigation.navigate('Profile');
   };
 
-  const handlePause = () => {
-    setPaused(!paused);
+  const handleLogout = () => {
+    navigation.reset({index: 0, routes: [{name: 'Login'}]});
   };
 
-  const onToggleRotate = () => {
-    if (unity) {
-      setRotate(!rotate);
-      UnityModule.postMessageToUnityManager({
-        name: 'ToggleRotate',
-        data: '',
-        callBack: (data) => {
-          console.log('Tip', JSON.stringify(data));
-        },
-      });
-    } else {
-      Alert.alert('Falhou');
-    }
-  };
+  const experiments: Experiment[] = [
+    {
+      title: 'Procedimento laboratorial',
+      description:
+        'Finalidade e detalhes do procedimento em questão etc etc alguma coisa importante sobre o procedimento e coisas que despertam interesse do aluno em realizar o procedimento no laboratório virtual de imunologia, treinando suas habilidades.',
+      difficulty: 'easy',
+    },
+    {
+      title: 'Procedimento imunológico 1',
+      description:
+        'Finalidade e detalhes do procedimento em questão etc etc alguma coisa importante sobre o procedimento e coisas que despertam interesse do aluno.',
+      difficulty: 'easy',
+    },
+    {
+      title: 'Procedimento imunológico 2',
+      description: 'Finalidade e detalhes do procedimento em questão etc.',
+      difficulty: 'normal',
+    },
+    {
+      title: 'Procedimento imunológico 3',
+      description: 'Finalidade e detalhes do procedimento 3 em questão etc.',
+      difficulty: 'middle',
+    },
+    {
+      title: 'Procedimento imunológico 4',
+      description: 'Finalidade e detalhes do procedimento 4 em questão etc.',
+      difficulty: 'hard',
+    },
+  ];
 
-  const handleUnityMessage = (handler: MessageHandler) => {
-    setCounter(counter + 1);
-    setTimeout(() => {
-      handler.send('Sou um callback!');
-    }, 2000);
+  const onPress = () => {
+    navigation.navigate('Lab');
   };
 
   return (
     <View style={styles.page}>
-      {active && (
-        <UnityView
-          ref={unity}
-          onUnityMessage={handleUnityMessage}
-          style={[styles.unity, {opacity: loading ? 0 : 1}]}
-        />
-      )}
-
-      <Text style={styles.txt}>Bem vindo ao React Native com UNITY!</Text>
-      <Text style={styles.txt}>Contador de Clicks: {counter}</Text>
-      <TouchableOpacity style={styles.btn} onPress={handleActive}>
-        <Text style={styles.btnTxt}>
-          {active ? 'Desativar' : loading ? 'Carregando' : 'Ativar'} UNITY
-        </Text>
-      </TouchableOpacity>
-      {active && !loading && (
-        <>
-          <TouchableOpacity style={styles.btn} onPress={onToggleRotate}>
-            <Text style={styles.btnTxt}>
-              {rotate ? 'Desativar' : 'Ativar'} Rotação
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn} onPress={handlePause}>
-            <Text style={styles.btnTxt}>{paused ? 'Continuar' : 'Pausar'}</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <Modal visible={showModal} animationType="fade" transparent={true}>
+        <TouchableOpacity onPress={handleModal} style={stylesModal.bg}>
+          <View
+            style={[
+              stylesModal.container,
+              colorScheme === 'light' ? stylesModal.light : stylesModal.dark,
+            ]}>
+            <Text weight="extra-bold">Notificações</Text>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+      <View style={styles.header}>
+        <Logo size={30} />
+        <View style={[styles.header, styles.headerBtnContainer]}>
+          <Icon
+            name="bell"
+            style={styles.headerBtn}
+            solid
+            onPress={handleModal}
+          />
+          <Icon
+            name="user"
+            style={styles.headerBtn}
+            solid
+            onPress={handleProfile}
+          />
+          <Icon
+            name="power-off"
+            style={styles.headerBtn}
+            onPress={handleLogout}
+          />
+        </View>
+      </View>
+      <Recommended experiment={experiments[0]} onPress={onPress} />
+      <Input icon="search" placeholder="Pesquisar" style={styles.search} />
+      <FlatList
+        data={experiments.filter((_, i) => i !== 0)}
+        keyExtractor={(item) => JSON.stringify(item)}
+        renderItem={({item}) => (
+          <ExperimentItem experiment={item} onPress={onPress} />
+        )}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  page: {
+  page: {paddingHorizontal: 15, maxHeight: '100%'},
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 15,
+  },
+  headerBtnContainer: {
+    width: '35%',
+  },
+  headerBtn: {
+    width: 30,
+    height: 30,
+    fontSize: 15,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    borderRadius: 30,
+    color: theme.colors.light,
+    backgroundColor: theme.colors.primary,
+  },
+  search: {
+    marginVertical: 15,
+  },
+});
+
+const stylesModal = StyleSheet.create({
+  bg: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  txt: {
-    color: '#212125',
+  container: {
+    margin: 15,
+    padding: 10,
+    borderRadius: 10,
+    marginTop: 60,
+    flex: 1,
   },
-  btn: {
-    backgroundColor: '#239D60',
-    borderRadius: 5,
-    paddingVertical: 10,
-    width: '50%',
-    alignItems: 'center',
-    marginVertical: 5,
+  light: {
+    backgroundColor: theme.colors.light,
   },
-  btnTxt: {
-    color: '#fff',
-  },
-  unity: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+  dark: {
+    backgroundColor: theme.colors.dark,
   },
 });
 
