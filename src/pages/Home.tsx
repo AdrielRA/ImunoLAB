@@ -11,6 +11,7 @@ import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
 import {useNavigation} from '@react-navigation/native';
+import {Auth} from '../controllers';
 
 type Experiment = {
   title: string;
@@ -31,7 +32,9 @@ const Home: React.FC = () => {
   };
 
   const handleLogout = () => {
-    navigation.reset({index: 0, routes: [{name: 'Login'}]});
+    Auth.logout().then(() =>
+      navigation.reset({index: 0, routes: [{name: 'Login'}]}),
+    );
   };
 
   const experiments: Experiment[] = [
