@@ -2,6 +2,8 @@ import React from 'react';
 import {StyleSheet, View, Image, TouchableOpacity} from 'react-native';
 import {Input, Button, Logo} from '../components';
 import {useNavigation} from '@react-navigation/native';
+//import {Auth} from '../controllers';
+//import {TAuth} from '../@types';
 
 const Login: React.FC = () => {
   const navigation = useNavigation();

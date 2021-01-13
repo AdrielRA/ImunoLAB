@@ -43,7 +43,7 @@ const Recommended: React.FC<Props> = (props) => {
         resizeMode="cover"
         source={{
           uri:
-            'https://upload.wikimedia.org/wikipedia/commons/f/f0/Everest_North_Face_toward_Base_Camp_Tibet_Luca_Galuzzi_2006_edit_1.jpg',
+            'https://cdn.bioclin.com.br/media/catalog/product/cache/1/image/1540x1540/9df78eab33525d08d6e5fb8d27136e95/i/m/image_478.png',
         }}
       />
     </TouchableOpacity>
@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
     marginLeft: '2%',
     height: '100%',
     width: '48%',
-    backgroundColor: '#8c3',
   },
   txtTitle: {
     textTransform: 'uppercase',

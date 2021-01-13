@@ -1,4 +1,4 @@
-package com.imunolab;
+package com.unifenas.imunolab;
 
 import com.facebook.react.ReactActivity;
 import android.content.Intent;
