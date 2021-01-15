@@ -27,7 +27,12 @@ const Login: React.FC = () => {
   const handleLogin = () => {
     if (user?.email && user?.password) {
       Auth.login(user)
-        .then(() => navigation.reset({index: 0, routes: [{name: 'Home'}]}))
+        .then((res) =>
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Home', params: {uid: res.user.uid}}],
+          }),
+        )
         .catch(() =>
           Alert.alert('Falha:', 'Não foi possível realizar o login.'),
         );
@@ -39,12 +44,15 @@ const Login: React.FC = () => {
   const handleRegister = () => {
     if (user?.email && user?.password) {
       Auth.createUser(user)
-        .then(() =>
-          Alert.alert('Sucesso!', 'Usuário cadastrado.\nRealize seu login!'),
-        )
-        .catch(() =>
-          Alert.alert('Falha:', 'Não foi possível realizar o cadastro.'),
-        );
+        .then((res) => {
+          navigation.reset({
+            index: 0,
+            routes: [
+              {name: 'Profile', params: {uid: res.user.uid, isNew: true}},
+            ],
+          });
+        })
+        .catch((err: Error) => Alert.alert('Falha:', err.message));
     } else {
       Alert.alert('Falha:', 'Informe os dados de cadastro antes!');
     }
@@ -57,6 +65,8 @@ const Login: React.FC = () => {
         <Input
           icon="user-circle"
           placeholder="seu.email@aqui.com"
+          autoCapitalize="none"
+          keyboardType="email-address"
           value={user?.email || ''}
           onChangeText={handleEmailChange}
           style={styles.input}
@@ -64,6 +74,9 @@ const Login: React.FC = () => {
         <Input
           icon="lock"
           placeholder="Senha"
+          autoCapitalize="none"
+          autoCompleteType="password"
+          autoCorrect={false}
           secureTextEntry={true}
           value={user?.password || ''}
           onChangeText={handlePasswordChange}

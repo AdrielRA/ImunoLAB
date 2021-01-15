@@ -1,10 +1,41 @@
-import React /*, {useState, useEffect, useRef} */ from 'react';
-import {StyleSheet, View, TouchableOpacity, Image} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, View, TouchableOpacity, Image, Alert} from 'react-native';
 import {Logo, Input, Text, Button} from '../components';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {RouteParamsList} from '../@types/Navigation';
+import {ProfileInfo} from '../@types';
+import {Profile} from '../controllers';
 
 const Home: React.FC = () => {
   const navigation = useNavigation();
+  const {params} = useRoute<RouteProp<RouteParamsList, 'Profile'>>();
+
+  const [profileInfo, setProfileInfo] = useState<ProfileInfo>();
+
+  useEffect(() => {
+    Profile.getInfo(params.uid).then(setProfileInfo);
+  }, [params.uid]);
+
+  const handleSave = () => {
+    if (profileInfo) {
+      Profile.updateInfo(params.uid, profileInfo)
+        .then(() => {
+          if (params.isNew) {
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Home', params: {uid: params.uid}}],
+            });
+          } else {
+            navigation.goBack();
+          }
+        })
+        .catch((err: Error) => {
+          Alert.alert('Algo deu errado:', err.message);
+        });
+    } else {
+      Alert.alert('Atenção:', 'Informe todos os campos!');
+    }
+  };
 
   const handleCancel = () => {
     navigation.goBack();
@@ -29,26 +60,39 @@ const Home: React.FC = () => {
         <Text>Orientadora: Profª. Dra. Flávia Aparecida Oliveira Santos</Text>
       </View>
       <View>
-        <Input icon="user-alt" placeholder="Seu nome" />
+        <Input
+          icon="user-alt"
+          placeholder="Seu nome"
+          value={profileInfo?.name}
+          onChangeText={(name) => setProfileInfo({...profileInfo, name})}
+        />
         <View style={styles.inlineInputs}>
           <Input
             icon="graduation-cap"
             placeholder="Curso"
             style={styles.inputCurse}
+            value={profileInfo?.course}
+            onChangeText={(course) => setProfileInfo({...profileInfo, course})}
           />
           <Input
             icon="user-graduate"
             placeholder="Período"
             keyboardType="number-pad"
+            value={profileInfo?.period?.toString()}
+            onChangeText={(period) =>
+              setProfileInfo({...profileInfo, period: +period})
+            }
           />
         </View>
-        <Button text="Salvar" />
-        <Button
-          text="Cancelar"
-          type="outline"
-          style={styles.btnCancel}
-          onPress={handleCancel}
-        />
+        <Button text="Salvar" onPress={handleSave} />
+        {!params.isNew && (
+          <Button
+            text="Cancelar"
+            type="outline"
+            style={styles.btnCancel}
+            onPress={handleCancel}
+          />
+        )}
       </View>
 
       <TouchableOpacity style={styles.btnUnifenas}>

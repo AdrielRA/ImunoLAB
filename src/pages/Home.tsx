@@ -10,8 +10,9 @@ import {
 import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-import {useNavigation} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {Auth} from '../controllers';
+import {RouteParamsList} from '../@types/Navigation';
 
 type Experiment = {
   title: string;
@@ -22,13 +23,14 @@ type Experiment = {
 const Home: React.FC = () => {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
+  const {params} = useRoute<RouteProp<RouteParamsList, 'Home'>>();
 
   const [showModal, setShowModal] = useState(false);
 
   const handleModal = () => setShowModal(!showModal);
 
   const handleProfile = () => {
-    navigation.navigate('Profile');
+    navigation.navigate('Profile', {uid: params.uid});
   };
 
   const handleLogout = () => {
