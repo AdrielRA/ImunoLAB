@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,19 +6,15 @@ import {
   Modal,
   useColorScheme,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {Auth} from '../controllers';
+import {Auth, Experiment} from '../controllers';
 import {RouteParamsList} from '../@types/Navigation';
-
-type Experiment = {
-  title: string;
-  description: string;
-  difficulty: 'easy' | 'normal' | 'middle' | 'hard';
-};
+import {Experiment as TExperiment} from '../@types';
 
 const Home: React.FC = () => {
   const navigation = useNavigation();
@@ -39,35 +35,11 @@ const Home: React.FC = () => {
     );
   };
 
-  const experiments: Experiment[] = [
-    {
-      title: 'Procedimento laboratorial',
-      description:
-        'Finalidade e detalhes do procedimento em questão etc etc alguma coisa importante sobre o procedimento e coisas que despertam interesse do aluno em realizar o procedimento no laboratório virtual de imunologia, treinando suas habilidades.',
-      difficulty: 'easy',
-    },
-    {
-      title: 'Procedimento imunológico 1',
-      description:
-        'Finalidade e detalhes do procedimento em questão etc etc alguma coisa importante sobre o procedimento e coisas que despertam interesse do aluno.',
-      difficulty: 'easy',
-    },
-    {
-      title: 'Procedimento imunológico 2',
-      description: 'Finalidade e detalhes do procedimento em questão etc.',
-      difficulty: 'normal',
-    },
-    {
-      title: 'Procedimento imunológico 3',
-      description: 'Finalidade e detalhes do procedimento 3 em questão etc.',
-      difficulty: 'middle',
-    },
-    {
-      title: 'Procedimento imunológico 4',
-      description: 'Finalidade e detalhes do procedimento 4 em questão etc.',
-      difficulty: 'hard',
-    },
-  ];
+  const [experiments, setExperiments] = useState<TExperiment[]>();
+
+  useEffect(() => {
+    Experiment.getExperiments().then(setExperiments);
+  }, []);
 
   const onPress = () => {
     navigation.navigate('Lab');
@@ -108,15 +80,29 @@ const Home: React.FC = () => {
           />
         </View>
       </View>
-      <Recommended experiment={experiments[0]} onPress={onPress} />
-      <Input icon="search" placeholder="Pesquisar" style={styles.search} />
-      <FlatList
-        data={experiments.filter((_, i) => i !== 0)}
-        keyExtractor={(item) => JSON.stringify(item)}
-        renderItem={({item}) => (
-          <ExperimentItem experiment={item} onPress={onPress} />
-        )}
-      />
+      {experiments ? (
+        <>
+          <Recommended experiment={experiments[0]} onPress={onPress} />
+          {experiments.length > 1 && (
+            <>
+              <Input
+                icon="search"
+                placeholder="Pesquisar"
+                style={styles.search}
+              />
+              <FlatList
+                data={experiments.filter((_, i) => i !== 0)}
+                keyExtractor={(item) => JSON.stringify(item)}
+                renderItem={({item}) => (
+                  <ExperimentItem experiment={item} onPress={onPress} />
+                )}
+              />
+            </>
+          )}
+        </>
+      ) : (
+        <ActivityIndicator color={theme.colors.primary} size="large" />
+      )}
     </View>
   );
 };

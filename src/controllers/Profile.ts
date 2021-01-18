@@ -10,7 +10,7 @@ const getInfo = (uid: string) =>
       .ref()
       .child(`users/${uid}`)
       .once('value')
-      .then((res) => resolve(res.val() as ProfileInfo))
+      .then((res) => resolve(res.val()))
       .catch(reject);
   });
 

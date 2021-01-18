@@ -9,21 +9,14 @@ import {
 import {Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-
-type Difficulty = 'easy' | 'normal' | 'middle' | 'hard';
-
-type Experiment = {
-  title: string;
-  description: string;
-  difficulty: Difficulty;
-};
+import {Experiment} from '../@types';
 
 type Props = TouchableOpacityProps & {
   experiment: Experiment;
 };
 
 const Item: React.FC<Props> = (props) => {
-  const {title, description, difficulty} = props.experiment;
+  const {name, description, difficulty} = props.experiment;
 
   const colorScheme = useColorScheme();
   return (
@@ -36,7 +29,7 @@ const Item: React.FC<Props> = (props) => {
       <View style={diffStyle(difficulty).indicator} />
       <View style={styles.textArea}>
         <Text weight="black" numberOfLines={1} style={styles.txtTitle}>
-          {title}
+          {name}
         </Text>
         <Text style={styles.txtDescription} numberOfLines={3}>
           {description}

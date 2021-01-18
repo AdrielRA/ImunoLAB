@@ -8,21 +8,14 @@ import {
 } from 'react-native';
 import {Text} from '../components';
 import theme from '../assets/theme.json';
-
-type Difficulty = 'easy' | 'normal' | 'middle' | 'hard';
-
-type Experiment = {
-  title: string;
-  description: string;
-  difficulty: Difficulty;
-};
+import {Experiment} from '../@types';
 
 type Props = TouchableOpacityProps & {
   experiment: Experiment;
 };
 
 const Recommended: React.FC<Props> = (props) => {
-  const {title, description} = props.experiment;
+  const {name, description, banner} = props.experiment;
 
   return (
     <TouchableOpacity {...props} style={styles.trendingTop}>
@@ -32,7 +25,7 @@ const Recommended: React.FC<Props> = (props) => {
           color="light"
           numberOfLines={1}
           style={styles.txtTitle}>
-          {title}
+          {name}
         </Text>
         <Text color="light" numberOfLines={5}>
           {description}
@@ -42,8 +35,7 @@ const Recommended: React.FC<Props> = (props) => {
         style={[styles.trendingTopImg]}
         resizeMode="cover"
         source={{
-          uri:
-            'https://cdn.bioclin.com.br/media/catalog/product/cache/1/image/1540x1540/9df78eab33525d08d6e5fb8d27136e95/i/m/image_478.png',
+          uri: banner,
         }}
       />
     </TouchableOpacity>
