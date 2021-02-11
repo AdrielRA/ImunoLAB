@@ -12,7 +12,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Lab from './pages/Lab';
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RouteParamsList>();
 
 const darkTheme = {
   ...DarkTheme,

@@ -1,5 +1,4 @@
 import database from '@react-native-firebase/database';
-import {Experiment} from '../@types';
 
 const getExperiments = () =>
   new Promise<Experiment[]>((resolve, reject) => {
@@ -10,7 +9,7 @@ const getExperiments = () =>
       .then((snap) => {
         const res = Object.entries(snap.val()).map(([k, v]) => {
           let val: Experiment = v as Experiment;
-          return {...val, key: k};
+          return {...val, id: k};
         });
 
         resolve(res);

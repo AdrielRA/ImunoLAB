@@ -1,11 +1,10 @@
-import {ProfileInfo} from '../@types';
 import database from '@react-native-firebase/database';
 
-const updateInfo = (uid: string, info: ProfileInfo) =>
+const updateInfo = (uid: string, info: Profile) =>
   database().ref().child(`users/${uid}`).set(info);
 
 const getInfo = (uid: string) =>
-  new Promise<ProfileInfo>((resolve, reject) => {
+  new Promise<Profile>((resolve, reject) => {
     database()
       .ref()
       .child(`users/${uid}`)

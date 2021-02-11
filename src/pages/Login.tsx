@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,54 +8,55 @@ import {
   Linking,
 } from 'react-native';
 import {Input, Button, Logo} from '../components';
-import {useNavigation} from '@react-navigation/native';
 import {Auth} from '../controllers';
-import {TAuth} from '../@types';
+import {InputProps, Props} from '../@types/Props';
+import strings from '../assets/strings.json';
 
-const Login: React.FC = () => {
-  const navigation = useNavigation();
-  const [user, setUser] = useState<TAuth.User>();
+type Loading = 'login' | 'register' | 'none';
 
-  const handleEmailChange = (email: string) => {
-    setUser({email: email || '', password: user?.password || ''});
-  };
+const Login: React.FC<Props<'Login'>> = ({navigation}) => {
+  const [user, setUser] = useState<User>({email: '', password: ''});
+  const [loading, setLoading] = useState<Loading>('none');
 
-  const handlePasswordChange = (password: string) => {
-    setUser({email: user?.email || '', password: password || ''});
+  const passwordRef = useRef<InputProps>(null);
+
+  const updateUser = (prop: {[key: string]: string}) => {
+    setUser({...user, ...prop});
   };
 
   const handleLogin = () => {
-    if (user?.email && user?.password) {
-      Auth.login(user)
-        .then((res) =>
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'Home', params: {uid: res.user.uid}}],
-          }),
-        )
-        .catch(() =>
-          Alert.alert('Falha:', 'Não foi possível realizar o login.'),
-        );
-    } else {
-      Alert.alert('Falha:', 'Informe os dados de acesso antes!');
-    }
+    setLoading('login');
+    Auth.login(user)
+      .then((res) =>
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Home', params: {uid: res.user.uid}}],
+        }),
+      )
+      .catch(() => {
+        setLoading('none');
+        Alert.alert('Falha:', 'Não foi possível realizar o login.');
+      });
   };
 
   const handleRegister = () => {
-    if (user?.email && user?.password) {
-      Auth.createUser(user)
-        .then((res) => {
-          navigation.reset({
-            index: 0,
-            routes: [
-              {name: 'Profile', params: {uid: res.user.uid, isNew: true}},
-            ],
-          });
-        })
-        .catch((err: Error) => Alert.alert('Falha:', err.message));
-    } else {
-      Alert.alert('Falha:', 'Informe os dados de cadastro antes!');
-    }
+    setLoading('register');
+    Auth.createUser(user)
+      .then((User) => {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Profile', params: {uid: User.uid, isNew: true}}],
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading('none');
+        Alert.alert('Falha:', strings.errors[error] || strings.errors.default);
+      });
+  };
+
+  const handleFocus = () => {
+    //passwordRef.current;
   };
 
   return (
@@ -68,28 +69,34 @@ const Login: React.FC = () => {
           autoCapitalize="none"
           keyboardType="email-address"
           value={user?.email || ''}
-          onChangeText={handleEmailChange}
+          returnKeyType="next"
+          onEndEditing={handleFocus}
+          onChangeText={(email) => updateUser({email})}
           style={styles.input}
         />
         <Input
+          ref={passwordRef}
           icon="lock"
           placeholder="Senha"
           autoCapitalize="none"
           autoCompleteType="password"
           autoCorrect={false}
           secureTextEntry={true}
+          maxLength={20}
           value={user?.password || ''}
-          onChangeText={handlePasswordChange}
+          onChangeText={(password) => updateUser({password})}
         />
         <Button
           style={[styles.button, styles.formPad]}
           text="Entrar"
+          loading={loading === 'login'}
           onPress={handleLogin}
         />
         <Button
           style={styles.button}
           text="Cadastrar"
           type="outline"
+          loading={loading === 'register'}
           onPress={handleRegister}
         />
       </View>

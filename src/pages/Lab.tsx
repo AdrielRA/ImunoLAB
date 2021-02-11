@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -11,11 +11,17 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import {Text, Button} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import UnityView, {MessageHandler} from 'react-native-unity-view';
+
+type Params = {
+  experiment: Experiment;
+};
 
 const Home: React.FC = () => {
   const navigation = useNavigation();
+  const {params} = useRoute<RouteProp<RouteParamsList, 'Lab'>>();
+  const [experiment, setExperiment] = useState<Experiment>();
   const colorScheme = useColorScheme();
   const [showModal, setShowModal] = useState(false);
   const [showStepDetail, setShowStepDetail] = useState(false);
@@ -24,6 +30,10 @@ const Home: React.FC = () => {
     setShowModal(false);
     navigation.goBack();
   };
+
+  useEffect(() => {
+    setExperiment(params.experiment);
+  }, [params]);
 
   //const [active, setActive] = useState(true);
   //const [loading, setLoading] = useState(true);
@@ -128,7 +138,7 @@ const Home: React.FC = () => {
       </Modal>
       <View style={styles.header}>
         <Text weight="black" numberOfLines={1}>
-          NOME EXPERIMENTO
+          {experiment?.name.toUpperCase()}
         </Text>
         <Icon
           name="bars"

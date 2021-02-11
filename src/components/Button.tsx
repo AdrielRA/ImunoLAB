@@ -3,6 +3,7 @@ import {
   TouchableOpacity as TouchableOpacityRN,
   TouchableOpacityProps,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import theme from '../assets/theme.json';
 import Text from './Text';
@@ -10,10 +11,11 @@ import Text from './Text';
 type Props = TouchableOpacityProps & {
   type?: 'contained' | 'outline';
   text: string;
+  loading?: boolean;
 };
 
 const Button: React.FC<Props> = (props) => {
-  const {style, type, text} = props;
+  const {style, type, text, loading} = props;
 
   return (
     <TouchableOpacityRN
@@ -29,6 +31,12 @@ const Button: React.FC<Props> = (props) => {
         style={styles.txt}>
         {text.toUpperCase()}
       </Text>
+      {loading && (
+        <ActivityIndicator
+          style={styles.load}
+          color={type === 'outline' ? theme.colors.primary : theme.colors.light}
+        />
+      )}
     </TouchableOpacityRN>
   );
 };
@@ -36,6 +44,7 @@ const Button: React.FC<Props> = (props) => {
 const styles = StyleSheet.create({
   button: {
     height: 45,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
@@ -49,6 +58,9 @@ const styles = StyleSheet.create({
   },
   txt: {
     fontSize: 20,
+  },
+  load: {
+    marginLeft: 10,
   },
 });
 

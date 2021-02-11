@@ -4,29 +4,27 @@ import {
   View,
   FlatList,
   Modal,
-  useColorScheme,
   TouchableOpacity,
   ActivityIndicator,
+  useColorScheme,
 } from 'react-native';
 import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {Auth, Experiment} from '../controllers';
-import {RouteParamsList} from '../@types/Navigation';
-import {Experiment as TExperiment} from '../@types';
+import type {Props} from '../@types/Props';
 
-const Home: React.FC = () => {
-  const navigation = useNavigation();
+import {Auth, Experiment} from '../controllers';
+
+const Home: React.FC<Props<'Home'>> = ({navigation, route}) => {
   const colorScheme = useColorScheme();
-  const {params} = useRoute<RouteProp<RouteParamsList, 'Home'>>();
+  const {params} = route;
 
   const [showModal, setShowModal] = useState(false);
 
   const handleModal = () => setShowModal(!showModal);
 
   const handleProfile = () => {
-    navigation.navigate('Profile', {uid: params.uid});
+    navigation.navigate('Profile', {uid: params.uid, isNew: false});
   };
 
   const handleLogout = () => {
@@ -35,14 +33,15 @@ const Home: React.FC = () => {
     );
   };
 
-  const [experiments, setExperiments] = useState<TExperiment[]>();
+  const [experiments, setExperiments] = useState<Experiment[]>();
 
   useEffect(() => {
     Experiment.getExperiments().then(setExperiments);
   }, []);
 
   const onPress = () => {
-    navigation.navigate('Lab');
+    if (experiments)
+      navigation.navigate('Lab', {experiment: experiments[0], uid: params.uid});
   };
 
   return (

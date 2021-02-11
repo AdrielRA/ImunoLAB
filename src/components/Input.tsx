@@ -1,21 +1,15 @@
 import React from 'react';
 import {
   TextInput as TextInputRN,
-  TextInputProps,
   StyleSheet,
   View,
   useColorScheme,
 } from 'react-native';
 import theme from '../assets/theme.json';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import {InputProps} from '../@types/Props';
 
-type Props = TextInputProps & {
-  color?: 'primary' | 'dark' | 'light';
-  type?: 'text' | 'email' | 'password' | 'number';
-  icon: string;
-};
-
-const Input: React.FC<Props> = (props) => {
+const Input: React.FC<InputProps> = React.forwardRef((props, ref) => {
   const colorScheme = useColorScheme();
 
   const {children, type, style, icon} = props;
@@ -38,16 +32,22 @@ const Input: React.FC<Props> = (props) => {
         styles.container,
         colorScheme === 'dark' ? styles.borderLight : styles.borderDark,
       ]}>
-      <Icon name={icon} size={30} color={theme.colors.primary} />
+      <Icon
+        name={icon}
+        size={30}
+        color={theme.colors.primary}
+        style={styles.icon}
+      />
       <TextInputRN
         {...props}
+        ref={ref}
         style={styles.input}
         placeholderTextColor={theme.colors.primary}>
         {children}
       </TextInputRN>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -57,11 +57,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
   },
+  icon: {
+    width: '12%',
+  },
   input: {
-    paddingLeft: 10,
     fontSize: 20,
     fontFamily: 'Catamaran-Bold',
     color: theme.colors.primary,
+    width: '91%',
   },
   borderLight: {
     borderColor: theme.colors.light,
