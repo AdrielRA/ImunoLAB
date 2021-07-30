@@ -9,7 +9,6 @@ import {
 import {Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-import {Experiment} from '../@types';
 
 type Props = TouchableOpacityProps & {
   experiment: Experiment;

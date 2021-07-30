@@ -1,13 +1,7 @@
 import React from 'react';
-import {
-  TextInput as TextInputRN,
-  StyleSheet,
-  View,
-  useColorScheme,
-} from 'react-native';
+import {TextInput, StyleSheet, View, useColorScheme} from 'react-native';
 import theme from '../assets/theme.json';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import {InputProps} from '../@types/Props';
 
 const Input: React.FC<InputProps> = React.forwardRef((props, ref) => {
   const colorScheme = useColorScheme();
@@ -38,13 +32,13 @@ const Input: React.FC<InputProps> = React.forwardRef((props, ref) => {
         color={theme.colors.primary}
         style={styles.icon}
       />
-      <TextInputRN
+      <TextInput
         {...props}
-        ref={ref}
+        ref={ref as any}
         style={styles.input}
         placeholderTextColor={theme.colors.primary}>
         {children}
-      </TextInputRN>
+      </TextInput>
     </View>
   );
 });
@@ -57,14 +51,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
   },
-  icon: {
-    width: '12%',
-  },
+  icon: {marginRight: 5},
   input: {
     fontSize: 20,
     fontFamily: 'Catamaran-Bold',
     color: theme.colors.primary,
-    width: '91%',
+    flex: 1,
   },
   borderLight: {
     borderColor: theme.colors.light,

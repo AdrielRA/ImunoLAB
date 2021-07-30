@@ -1,16 +1,18 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {StyleSheet, View, TouchableOpacity, Image, Alert} from 'react-native';
 import {Logo, Input, Text, Button} from '../components';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {RouteParamsList} from '../@types/Navigation';
-import {ProfileInfo} from '../@types';
+
 import {Profile} from '../controllers';
 
 const Home: React.FC = () => {
   const navigation = useNavigation();
   const {params} = useRoute<RouteProp<RouteParamsList, 'Profile'>>();
 
-  const [profileInfo, setProfileInfo] = useState<ProfileInfo>();
+  const [profileInfo, setProfileInfo] = useState<Profile>();
+
+  const courseRef = useRef<InputProps>(null);
+  const periodRef = useRef<InputProps>(null);
 
   useEffect(() => {
     Profile.getInfo(params.uid).then(setProfileInfo);
@@ -62,21 +64,36 @@ const Home: React.FC = () => {
       <View>
         <Input
           icon="user-alt"
+          returnKeyType="next"
           placeholder="Seu nome"
           value={profileInfo?.name}
+          onEndEditing={() => {
+            if (courseRef?.current?.focus) {
+              courseRef.current.focus();
+            }
+          }}
           onChangeText={(name) => setProfileInfo({...profileInfo, name})}
         />
         <View style={styles.inlineInputs}>
           <Input
+            ref={courseRef}
             icon="graduation-cap"
             placeholder="Curso"
+            returnKeyType="next"
             style={styles.inputCurse}
             value={profileInfo?.course}
+            onEndEditing={() => {
+              if (periodRef?.current?.focus) {
+                periodRef.current.focus();
+              }
+            }}
             onChangeText={(course) => setProfileInfo({...profileInfo, course})}
           />
           <Input
+            ref={periodRef}
             icon="user-graduate"
             placeholder="Período"
+            style={styles.inputPeriod}
             keyboardType="number-pad"
             value={profileInfo?.period?.toString()}
             onChangeText={(period) =>
@@ -132,6 +149,9 @@ const styles = StyleSheet.create({
   inputCurse: {
     width: '57.5%',
     marginRight: '2%',
+  },
+  inputPeriod: {
+    width: '40%',
   },
   btnCancel: {
     marginTop: 10,

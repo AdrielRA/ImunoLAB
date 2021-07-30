@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import {Input, Button, Logo} from '../components';
 import {Auth} from '../controllers';
-import {InputProps, Props} from '../@types/Props';
 import strings from '../assets/strings.json';
 
 type Loading = 'login' | 'register' | 'none';
@@ -55,10 +54,6 @@ const Login: React.FC<Props<'Login'>> = ({navigation}) => {
       });
   };
 
-  const handleFocus = () => {
-    //passwordRef.current;
-  };
-
   return (
     <View style={styles.page}>
       <Logo style={styles.logo} />
@@ -70,7 +65,11 @@ const Login: React.FC<Props<'Login'>> = ({navigation}) => {
           keyboardType="email-address"
           value={user?.email || ''}
           returnKeyType="next"
-          onEndEditing={handleFocus}
+          onEndEditing={() => {
+            if (passwordRef?.current?.focus) {
+              passwordRef.current.focus();
+            }
+          }}
           onChangeText={(email) => updateUser({email})}
           style={styles.input}
         />

@@ -11,7 +11,6 @@ import {
 import {Logo, Input, ExperimentItem, Recommended, Text} from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
-import type {Props} from '../@types/Props';
 
 import {Auth, Experiment} from '../controllers';
 
@@ -40,8 +39,9 @@ const Home: React.FC<Props<'Home'>> = ({navigation, route}) => {
   }, []);
 
   const onPress = () => {
-    if (experiments)
+    if (experiments) {
       navigation.navigate('Lab', {experiment: experiments[0], uid: params.uid});
+    }
   };
 
   return (

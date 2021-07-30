@@ -5,6 +5,7 @@ import {
   Modal,
   ScrollView,
   useColorScheme,
+  Alert,
   TouchableOpacity as TouchableOpacityRN,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -13,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import theme from '../assets/theme.json';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import UnityView, {MessageHandler} from 'react-native-unity-view';
+import {Experiment} from '../controllers';
 
 type Params = {
   experiment: Experiment;
@@ -25,6 +27,11 @@ const Home: React.FC = () => {
   const colorScheme = useColorScheme();
   const [showModal, setShowModal] = useState(false);
   const [showStepDetail, setShowStepDetail] = useState(false);
+  const [theEnd, setTheEnd] = useState(false);
+  const [step, setStep] = useState<ExStep>();
+  const [stepKey, setStepKey] = useState<string>();
+  const [stepInfo, setStepInfo] = useState<Step>();
+  const [loadStepInfo, setLoadStepInfo] = useState(false);
   const handleModal = () => setShowModal(!showModal);
   const handleCancel = () => {
     setShowModal(false);
@@ -34,6 +41,32 @@ const Home: React.FC = () => {
   useEffect(() => {
     setExperiment(params.experiment);
   }, [params]);
+
+  useEffect(() => {
+    if (experiment) {
+      setStepKey(experiment.start);
+    }
+  }, [experiment]);
+
+  useEffect(() => {
+    if (stepKey) {
+      console.log(stepKey);
+      setStep(experiment?.steps[stepKey]);
+      setLoadStepInfo(true);
+      Experiment.getStepInfo(stepKey).then(setStepInfo);
+    }
+  }, [experiment, stepKey]);
+
+  useEffect(() => {
+    setLoadStepInfo(false);
+  }, [stepInfo]);
+
+  useEffect(() => {
+    if (theEnd) {
+      Alert.alert('Parabéns', 'Você concluiu o experimento');
+      navigation.goBack();
+    }
+  }, [theEnd, navigation]);
 
   //const [active, setActive] = useState(true);
   //const [loading, setLoading] = useState(true);
@@ -87,37 +120,47 @@ const Home: React.FC = () => {
     }, 2000);
   };
 
+  const [loops, setLoops] = useState<any>({});
+
+  const handleNext = (option?: number) => {
+    console.log(step?.type);
+    switch (step?.type) {
+      case 'queue':
+        if (step.next.length > 0) {
+          let next = step.next;
+          setStepKey(next.shift());
+          setStep({...step, next} as ExStep);
+        }
+        break;
+      case 'choice':
+        setStepKey(step.next[option || 0].key);
+        break;
+      case 'loop':
+        if (stepKey && step.next.length > 0) {
+          let nextIndex = loops[stepKey] ? loops[stepKey] : 0;
+          console.log(nextIndex);
+          setStepKey(step.next[nextIndex]);
+          let index = (loops[stepKey] || 0) + 1;
+          index = index > step.next.length ? 0 : index;
+          setLoops((prev: any) => ({
+            ...prev,
+            [stepKey]: index,
+          }));
+        }
+        break;
+
+      default:
+        if (step?.next && step?.next?.length > 0) {
+          setStepKey(step?.next[0]);
+        } else {
+          setTheEnd(true);
+        }
+        break;
+    }
+  };
+
   return (
     <View style={styles.page}>
-      {/*<View style={styles.page}>
-      {active && (
-        <UnityView
-          ref={unity}
-          onUnityMessage={handleUnityMessage}
-          style={[styles.unity /*{opacity: loading ? 0 : 1}]}
-        />
-      )}
-
-      <Text style={styles.txt}>Bem vindo ao React Native com UNITY!</Text>
-      <Text style={styles.txt}>Contador de Clicks: {counter}</Text>
-      <TouchableOpacity style={styles.btn} onPress={handleActive}>
-        <Text style={styles.btnTxt}>
-          {active ? 'Desativar' : loading ? 'Carregando' : 'Ativar'} UNITY
-        </Text>
-      </TouchableOpacity>
-      {active && !loading && (
-        <>
-          <TouchableOpacity style={styles.btn} onPress={onToggleRotate}>
-            <Text style={styles.btnTxt}>
-              {rotate ? 'Desativar' : 'Ativar'} Rotação
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn} onPress={handlePause}>
-            <Text style={styles.btnTxt}>{paused ? 'Continuar' : 'Pausar'}</Text>
-          </TouchableOpacity>
-        </>
-      )}
-      </View>*/}
       <Modal visible={showModal} animationType="fade" transparent={true}>
         <TouchableOpacityRN onPress={handleModal} style={stylesModal.bg}>
           <View
@@ -154,37 +197,54 @@ const Home: React.FC = () => {
       />
 
       <View style={[styles.stepContainer, showStepDetail && styles.stepDetail]}>
-        <View style={styles.btnBotContainer}>
-          <TouchableOpacity
-            style={styles.btnBot}
-            onPress={() => console.log('pressionou')}>
-            <Icon name="robot" color={theme.colors.light} size={15} />
-            <Text weight="black" color="light">
-              DICA
+        {!showModal && (
+          <>
+            <View style={styles.btnBotContainer}>
+              <TouchableOpacity
+                style={styles.btnBot}
+                onPress={() => console.log('pressionou')}>
+                <Icon name="robot" color={theme.colors.light} size={15} />
+                <Text weight="black" color="light">
+                  DICA
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.txtStepTitle}>
+              {stepInfo?.title || 'TAREFA'}
             </Text>
-          </TouchableOpacity>
-        </View>
-        <Text>ATIVIDADE A EXECUTAR</Text>
-        <Icon
-          name={`chevron-${showStepDetail ? 'down' : 'up'}`}
-          color={theme.colors.primary}
-          size={30}
-          onPress={() => setShowStepDetail(!showStepDetail)}
-        />
-        {showStepDetail && (
-          <ScrollView style={styles.stepDetailArea}>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-            <Text>Detalhes</Text>
-          </ScrollView>
+            <Icon
+              name={`chevron-${showStepDetail ? 'down' : 'up'}`}
+              color={theme.colors.primary}
+              size={30}
+              onPress={() => setShowStepDetail(!showStepDetail)}
+            />
+            {showStepDetail && (
+              <ScrollView style={styles.stepDetailArea}>
+                <Text style={styles.txtStepDetail}>{stepInfo?.detail}</Text>
+                {step?.type !== 'choice' ? (
+                  <Button
+                    style={styles.btnNext}
+                    text="Proximo"
+                    loading={loadStepInfo}
+                    type="outline"
+                    onPress={() => handleNext()}
+                  />
+                ) : (
+                  <View>
+                    {step.next.map((option, index) => (
+                      <Button
+                        style={styles.btnNext}
+                        key={option + index}
+                        text={option.value}
+                        type="outline"
+                        onPress={() => handleNext(index)}
+                      />
+                    ))}
+                  </View>
+                )}
+              </ScrollView>
+            )}
+          </>
         )}
       </View>
     </View>
@@ -219,9 +279,15 @@ const styles = StyleSheet.create({
     height: 80,
     position: 'relative',
   },
+  txtStepTitle: {
+    fontWeight: '700',
+    fontSize: 15,
+    textTransform: 'uppercase',
+  },
   stepDetail: {
     height: 240,
   },
+  txtStepDetail: {textAlign: 'center', paddingVertical: 15},
   stepDetailArea: {
     width: '100%',
   },
@@ -241,6 +307,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
 
     alignItems: 'center',
+  },
+  btnNext: {
+    marginTop: 15,
   },
 });
 

@@ -12,9 +12,32 @@ const getExperiments = () =>
           return {...val, id: k};
         });
 
+        /*
+        const res = Object.entries(snap.val()).map(([k, v]) => {
+          let item = v as any;
+          item.steps = Object.entries(item.steps).map(([k2, v2]) => {
+            return {id: k2, ...(v2 as any)} as ExStep;
+          });
+
+          let val: Experiment = item as Experiment;
+          return {...val, id: k};
+        });
+        */
+
         resolve(res);
       })
       .catch(reject);
   });
 
-export {getExperiments};
+const getStepInfo = (id: string) =>
+  new Promise<Step>((resolve, reject) => {
+    database()
+      .ref()
+      .child('steps')
+      .child(id)
+      .once('value')
+      .then((snap) => resolve({id: snap.key, ...snap.val()} as Step))
+      .catch(reject);
+  });
+
+export {getExperiments, getStepInfo};
