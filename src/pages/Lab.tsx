@@ -6,6 +6,7 @@ import {
   ScrollView,
   useColorScheme,
   Alert,
+  StatusBar,
   TouchableOpacity as TouchableOpacityRN,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -29,6 +30,7 @@ const Home: React.FC = () => {
   const [showStepDetail, setShowStepDetail] = useState(false);
   const [theEnd, setTheEnd] = useState(false);
   const [step, setStep] = useState<ExStep>();
+  const [cursor, setCursor] = useState(0);
   const [stepKey, setStepKey] = useState<string>();
   const [stepInfo, setStepInfo] = useState<Step>();
   const [loadStepInfo, setLoadStepInfo] = useState(false);
@@ -44,14 +46,14 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (experiment) {
-      setStepKey(experiment.start);
+      setStep(experiment?.steps[cursor]);
+      setStepKey(experiment.steps[cursor].key);
     }
-  }, [experiment]);
+  }, [experiment, cursor]);
 
   useEffect(() => {
     if (stepKey) {
       console.log(stepKey);
-      setStep(experiment?.steps[stepKey]);
       setLoadStepInfo(true);
       Experiment.getStepInfo(stepKey).then(setStepInfo);
     }
@@ -120,47 +122,59 @@ const Home: React.FC = () => {
     }, 2000);
   };
 
-  const [loops, setLoops] = useState<any>({});
+  const handleBot = () => {
+    if (step?.bot) {
+      let index = Math.floor(Math.random() * (step.bot.length - 0) + 0);
+      Alert.alert('🤖 ImunoBOT: Dica', step.bot[index]);
+    }
+  };
 
   const handleNext = (option?: number) => {
-    console.log(step?.type);
+    if (loadStepInfo) {
+      return;
+    }
     switch (step?.type) {
-      case 'queue':
-        if (step.next.length > 0) {
-          let next = step.next;
-          setStepKey(next.shift());
-          setStep({...step, next} as ExStep);
-        }
-        break;
+      // case 'queue':
+      //   if (step.next.length > 0) {
+      //     let next = step.next;
+      //     setStepKey(next.shift());
+      //     setStep({...step, next} as ExStep);
+      //   }
+      //   break;
       case 'choice':
-        setStepKey(step.next[option || 0].key);
+        setCursor(
+          (prev) => prev + (step?.next as NextType[])[option || 0]?.index || 0,
+        );
         break;
-      case 'loop':
-        if (stepKey && step.next.length > 0) {
-          let nextIndex = loops[stepKey] ? loops[stepKey] : 0;
-          console.log(nextIndex);
-          setStepKey(step.next[nextIndex]);
-          let index = (loops[stepKey] || 0) + 1;
-          index = index > step.next.length ? 0 : index;
-          setLoops((prev: any) => ({
-            ...prev,
-            [stepKey]: index,
-          }));
-        }
+      case 'end':
+        setTheEnd(true);
         break;
+      case 'jump':
+        setCursor((prev) => prev + (step?.next as number));
+        break;
+      // case 'loop':
+      //   if (stepKey && step.next.length > 0) {
+      //     let nextIndex = loops[stepKey] ? loops[stepKey] : 0;
+      //     console.log(nextIndex);
+      //     setStepKey(step.next[nextIndex]);
+      //     let index = (loops[stepKey] || 0) + 1;
+      //     index = index > step.next.length ? 0 : index;
+      //     setLoops((prev: any) => ({
+      //       ...prev,
+      //       [stepKey]: index,
+      //     }));
+      //   }
+      //   break;
 
       default:
-        if (step?.next && step?.next?.length > 0) {
-          setStepKey(step?.next[0]);
-        } else {
-          setTheEnd(true);
-        }
+        setCursor((prev) => prev + 1);
         break;
     }
   };
 
   return (
     <View style={styles.page}>
+      <StatusBar backgroundColor={theme.colors.primary} />
       <Modal visible={showModal} animationType="fade" transparent={true}>
         <TouchableOpacityRN onPress={handleModal} style={stylesModal.bg}>
           <View
@@ -199,16 +213,16 @@ const Home: React.FC = () => {
       <View style={[styles.stepContainer, showStepDetail && styles.stepDetail]}>
         {!showModal && (
           <>
-            <View style={styles.btnBotContainer}>
-              <TouchableOpacity
-                style={styles.btnBot}
-                onPress={() => console.log('pressionou')}>
-                <Icon name="robot" color={theme.colors.light} size={15} />
-                <Text weight="black" color="light">
-                  DICA
-                </Text>
-              </TouchableOpacity>
-            </View>
+            {step?.bot && (
+              <View style={styles.btnBotContainer}>
+                <TouchableOpacity style={styles.btnBot} onPress={handleBot}>
+                  <Icon name="robot" color={theme.colors.light} size={15} />
+                  <Text weight="black" color="light">
+                    DICA
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
             <Text style={styles.txtStepTitle}>
               {stepInfo?.title || 'TAREFA'}
             </Text>
@@ -231,11 +245,11 @@ const Home: React.FC = () => {
                   />
                 ) : (
                   <View>
-                    {step.next.map((option, index) => (
+                    {(step.next as NextType[]).map((option, index) => (
                       <Button
                         style={styles.btnNext}
-                        key={option + index}
-                        text={option.value}
+                        key={option.index}
+                        text={option.text}
                         type="outline"
                         onPress={() => handleNext(index)}
                       />
@@ -282,6 +296,7 @@ const styles = StyleSheet.create({
   txtStepTitle: {
     fontWeight: '700',
     fontSize: 15,
+    textAlign: 'center',
     textTransform: 'uppercase',
   },
   stepDetail: {

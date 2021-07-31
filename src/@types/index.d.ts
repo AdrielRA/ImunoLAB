@@ -21,29 +21,29 @@ type Props<T extends keyof RouteParamsList> = {
 // ========== componentes ========== \\
 type InputProps = import('react-native').TextInputProps & {
   color?: 'primary' | 'dark' | 'light';
-  type?: 'text' | 'email' | 'password' | 'number';
+  focus?: () => void;
   icon: string;
   ref?: React.Ref<InputProps>;
-  focus?: () => void;
+  type?: 'text' | 'email' | 'password' | 'number';
 };
 
 type User = {
-  uid?: string;
   email: string;
   password: string;
+  uid?: string;
 };
 
 type Profile = {
-  name?: string;
   course?: string;
+  name?: string;
   period?: number;
 };
 
 declare enum Difficulty {
   easy = 'easy',
-  normal = 'normal',
-  middle = 'middle',
   hard = 'hard',
+  middle = 'middle',
+  normal = 'normal',
 }
 
 type Experiment = {
@@ -61,8 +61,7 @@ type Experiment = {
   resources: string[];
   results: Result[];
   sample: string;
-  start: string;
-  steps: any;
+  steps: ExStep[];
   supplies: string;
   technique: Technique[];
 };
@@ -79,10 +78,12 @@ type Technique = {
 
 type ExStep = {
   bot?: string[];
-  next: string[] | any[];
+  key: string;
+  next?: NextType[] | number;
   type: StepType;
 };
 
-type StepType = 'next' | 'queue' | 'choice' | 'loop';
+type StepType = 'choice' | 'end' | 'jump' | 'next';
+type NextType = {index: number; text: string};
 
-type Step = {id: string; detail: string; title: string};
+type Step = {detail: string; id: string; title: string};

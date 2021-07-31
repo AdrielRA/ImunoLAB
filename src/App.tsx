@@ -7,15 +7,10 @@ LogBox.ignoreLogs(['Warning: componentWillMount has been renamed']);
 
 const App = () => {
   return (
-    <>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={theme.colors.primary}
-      />
-      <SafeAreaView style={styles.page}>
-        <Routes />
-      </SafeAreaView>
-    </>
+    <SafeAreaView style={styles.page}>
+      <StatusBar backgroundColor={theme.colors.primary} />
+      <Routes />
+    </SafeAreaView>
   );
 };
 
