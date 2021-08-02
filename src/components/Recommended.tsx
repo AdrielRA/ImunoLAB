@@ -8,8 +8,6 @@ import {
 } from 'react-native';
 import {Text} from '../components';
 import theme from '../assets/theme.json';
-import {Experiment} from '../@types';
-
 type Props = TouchableOpacityProps & {
   experiment: Experiment;
 };

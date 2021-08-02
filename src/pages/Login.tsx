@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -10,14 +10,26 @@ import {
 import {Input, Button, Logo} from '../components';
 import {Auth} from '../controllers';
 import strings from '../assets/strings.json';
+import {onAuthChange} from '../controllers/Auth';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 
 type Loading = 'login' | 'register' | 'none';
 
 const Login: React.FC<Props<'Login'>> = ({navigation}) => {
   const [user, setUser] = useState<User>({email: '', password: ''});
   const [loading, setLoading] = useState<Loading>('none');
-
   const passwordRef = useRef<InputProps>(null);
+
+  useEffect(() => {
+    onAuthChange((authUser: FirebaseAuthTypes.User | null) => {
+      if (authUser !== null) {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Home', params: {uid: authUser.uid}}],
+        });
+      }
+    });
+  }, [navigation]);
 
   const updateUser = (prop: {[key: string]: string}) => {
     setUser({...user, ...prop});
@@ -25,17 +37,10 @@ const Login: React.FC<Props<'Login'>> = ({navigation}) => {
 
   const handleLogin = () => {
     setLoading('login');
-    Auth.login(user)
-      .then((res) =>
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'Home', params: {uid: res.user.uid}}],
-        }),
-      )
-      .catch(() => {
-        setLoading('none');
-        Alert.alert('Falha:', 'Não foi possível realizar o login.');
-      });
+    Auth.login(user).catch(() => {
+      setLoading('none');
+      Alert.alert('Falha:', 'Não foi possível realizar o login.');
+    });
   };
 
   const handleRegister = () => {
